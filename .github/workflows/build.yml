@@ -1,11 +1,13 @@
-# Build the 14 code binaries, check them against the original's SHA-1, and publish the
-# progress report decomp.dev reads (artifact SLUS_011.15_report). Needs no game data.
+
+# Build the 14 code binaries, check them against the original's SHA-1,
+# publish the progress report, and upload the memory map for cheat research.
 name: build
 
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,6 +22,14 @@ jobs:
         run: >
           docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/src -w /src hmbtn-build
           bash -c 'cmake -S . -B build -G Ninja && cmake --build build --target check'
+
+      - name: Upload memory map
+        uses: actions/upload-artifact@v4
+        with:
+          name: hmbtn-memory-map
+          path: |
+            build/program.map
+            build/program.elf
 
       - name: Progress report
         run: |
@@ -36,16 +46,3 @@ jobs:
         with:
           name: SLUS_011.15_report
           path: build/report.json
-
-      - name: Build and check
-        run: >
-          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/src -w /src hmbtn-build
-          bash -c 'cmake -S . -B build -G Ninja && cmake --build build --target check'
-
-      - name: Upload memory map
-        uses: actions/upload-artifact@v4
-        with:
-          name: hmbtn-memory-map
-          path: |
-            build/program.map
-            build/program.elf
