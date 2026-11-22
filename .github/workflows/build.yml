@@ -23,29 +23,23 @@ jobs:
           docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/src -w /src hmbtn-build
           bash -c 'cmake -S . -B build -G Ninja && cmake --build build --target check'
 
-      - name: Find telephone interaction files
+      - name: Find shopping dialogue implementation
         run: |
           {
-            echo "=== FILES CONTAINING TELEPHONE REFERENCES ==="
-            grep -RilE 'telephone|phone' src include 2>/dev/null || true
-          } > phone-files.txt
+            echo "=== FILES USING SHOP_DIALOGUE ==="
+            grep -Rln 'SHOP_DIALOGUE_' src/overlay/11_GF_FARM || true
 
-      - name: Extract relevant telephone code
-        run: |
-          {
-            while IFS= read -r file; do
-              [ -f "$file" ] || continue
-              echo
-              echo "========== $file =========="
-              grep -nEi -C 12 'telephone|phone|saturday|shopping|order|catalog' "$file" || true
-            done < phone-files.txt
-          } | head -n 350 > phone-order-small.txt
+            echo
+            echo "=== SHOP DIALOGUE CODE ==="
+            grep -RnE -C 18 'SHOP_DIALOGUE_|ZONE_TELEPHONE|TELEPHONE|SATURDAY|DAY_OF_WEEK|WEEKDAY' \
+              src/overlay/11_GF_FARM --include='*.c' --include='*.h' || true
+          } | head -n 260 > phone-order-code.txt
 
-      - name: Upload small telephone report
+      - name: Upload shopping implementation
         uses: actions/upload-artifact@v4
         with:
-          name: phone-order-small
-          path: phone-order-small.txt
+          name: phone-order-code
+          path: phone-order-code.txt
 
       - name: Progress report
         run: |
