@@ -36,3 +36,16 @@ jobs:
         with:
           name: SLUS_011.15_report
           path: build/report.json
+
+      - name: Build and check
+        run: >
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/src -w /src hmbtn-build
+          bash -c 'cmake -S . -B build -G Ninja && cmake --build build --target check'
+
+      - name: Upload memory map
+        uses: actions/upload-artifact@v4
+        with:
+          name: hmbtn-memory-map
+          path: |
+            build/program.map
+            build/program.elf
