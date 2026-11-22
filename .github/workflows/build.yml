@@ -23,6 +23,22 @@ jobs:
           docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/src -w /src hmbtn-build
           bash -c 'cmake -S . -B build -G Ninja && cmake --build build --target check'
 
+      - name: Extract TV memory symbols
+        run: |
+          {
+            echo "=== MEMORY MAP ==="
+            grep -inE 'message_index|message_pairs|message_machine' build/program.map || true
+
+            echo "=== ELF SYMBOLS ==="
+            nm -a -n build/program.elf | grep -iE 'message_index|message_pairs|message_machine' || true
+          } > tv-symbols.txt
+
+      - name: Upload TV symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: tv-symbols
+          path: tv-symbols.txt
+
       - name: Upload memory map
         uses: actions/upload-artifact@v4
         with:
