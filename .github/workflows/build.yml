@@ -23,6 +23,25 @@ jobs:
           docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/src -w /src hmbtn-build
           bash -c 'cmake -S . -B build -G Ninja && cmake --build build --target check'
 
+      - name: Search inn telephone ordering source
+        run: |
+          {
+            echo "=== TELEPHONE / PHONE ==="
+            grep -RniE -C 6 'telephone|phone|call' src include || true
+
+            echo "=== SATURDAY / WEEKDAY ==="
+            grep -RniE -C 6 'saturday|weekday|day_of_week|dayofweek' src include || true
+
+            echo "=== SHOPPING / ORDER ==="
+            grep -RniE -C 6 'shopping|order|knife|catalog' src include || true
+          } > phone-order-search.txt
+
+      - name: Upload telephone ordering source
+        uses: actions/upload-artifact@v4
+        with:
+          name: phone-order-search
+          path: phone-order-search.txt
+
       - name: Extract TV memory symbols
         run: |
           {
