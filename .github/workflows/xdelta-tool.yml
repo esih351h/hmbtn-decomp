@@ -2,6 +2,9 @@
 name: Xdelta tool
 
 on:
+  push:
+    branches:
+      - tools/xdelta322-runner
   workflow_dispatch:
 
 permissions:
