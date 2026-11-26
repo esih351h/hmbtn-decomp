@@ -1,0 +1,53 @@
+
+name: Xdelta tool
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-xdelta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download official Xdelta 3.2.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p extracted dist
+          curl --fail --location --retry 3 \
+            "https://github.com/jmacd/xdelta/releases/download/v3.2.2/xdelta3-3.2.2-linux-x86_64.tar.gz" \
+            --output /tmp/xdelta3.tar.gz
+
+          tar -tzf /tmp/xdelta3.tar.gz
+          tar -xzf /tmp/xdelta3.tar.gz -C extracted
+
+          BIN="$(find extracted -type f -name 'xdelta3' -print -quit)"
+          if [ -z "$BIN" ]; then
+            echo "::error::Could not find xdelta3 executable"
+            exit 1
+          fi
+
+          install -m 0755 "$BIN" dist/xdelta3
+          dist/xdelta3 -V
+          dist/xdelta3 -h > dist/xdelta3-help.txt 2>&1 || true
+          sha256sum dist/xdelta3 | tee dist/SHA256SUMS
+
+          cat > dist/README.txt <<'EOF'
+          Official Xdelta3 3.2.2 Linux x86_64 executable.
+          https://github.com/jmacd/xdelta/releases/tag/v3.2.2
+
+          Decode:
+          ./xdelta3 -d -s original.bin patch.xdelta output.bin
+
+          Keep the original game image unchanged.
+          EOF
+
+      - name: Upload Xdelta executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: xdelta3-linux-x86_64
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
