@@ -25,6 +25,18 @@ jobs:
             -v "$PWD":/src -w /src hmbtn-build \
             bash -c 'cmake -S . -B build -G Ninja && cmake --build build --target program'
 
+      - name: Upload selective build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rucksack-selective-build
+          path: |
+            build/11_GF_FARM.bin
+            build/SLUS_011.15
+            build/program.elf
+            build/program.map
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Check the farm overlay size
         run: |
           test -s build/11_GF_FARM.bin
@@ -37,15 +49,3 @@ jobs:
           if size > 0x76000:
               raise SystemExit("Farm overlay exceeds the original 0x76000-byte image")
           PY
-
-      - name: Upload selective build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: rucksack-selective-build
-          path: |
-            build/11_GF_FARM.bin
-            build/SLUS_011.15
-            build/program.elf
-            build/program.map
-          if-no-files-found: error
-          retention-days: 7
