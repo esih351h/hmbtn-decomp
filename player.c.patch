@@ -1,0 +1,30 @@
+--- a/src/overlay/11_GF_FARM/people/player.c
++++ b/src/overlay/11_GF_FARM/people/player.c
+@@ -3925,7 +3925,8 @@
+ {
+     if (mode == 0)
+     {
+-        stored_item_table_exchange(game_state.player.items, PLAYER_BAG_SLOTS, &game_state.player.held[HELD_ITEM], 0);
++        /* R2: take one crop from a stack, leaving the remainder in the bag. */
++        stored_item_table_exchange(game_state.player.items, PLAYER_BAG_SLOTS, &game_state.player.held[HELD_ITEM], 2);
+     }
+     else
+     {
+@@ -4494,6 +4495,17 @@
+     }
+     switch (mode)
+     {
++    case 2:
++        /* Only split category-0 items (crops/dishes); seeds keep the original exchange. */
++        if (current->id != 0 && other->id == 0 && current->count >= 2 &&
++            item_category(current->id) == ITEM_CATEGORY_CROP)
++        {
++            *other = *current;
++            other->count = 1;
++            current->count--;
++            break;
++        }
++        /* Non-stackable items and seeds use the original mode-0 exchange below. */
+     case 0:
+         saved = *current;
+ 
