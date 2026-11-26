@@ -4489,26 +4489,29 @@ static s32 stored_item_table_exchange(FarmStoredItem *current, s32 count, FarmSt
 {
     FarmStoredItem saved;
     s32 previous;
+
     if ((current->id == 0) && (other->id == 0))
     {
         return -1;
     }
-    switch (mode)
+
+    if (mode == 2)
     {
-    case 2:
-        /* Only split category-0 items (crops/dishes); seeds keep the original exchange. */
         if (current->id != 0 && other->id == 0 && current->count >= 2 &&
             item_category(current->id) == ITEM_CATEGORY_CROP)
         {
             *other = *current;
             other->count = 1;
             current->count--;
-            break;
+            return -1;
         }
-        /* Non-stackable items and seeds use the original mode-0 exchange below. */
+        mode = 0;
+    }
+
+    switch (mode)
+    {
     case 0:
         saved = *current;
-
         current->id = 0;
         current->modifier = 0;
         current->count = 0;
@@ -4517,9 +4520,9 @@ static s32 stored_item_table_exchange(FarmStoredItem *current, s32 count, FarmSt
         stored_item_table_compact(current, count);
         *other = saved;
         break;
+
     case 1:
         previous = count - 1;
-
         while (previous >= 0 && current[previous].id == 0)
         {
             previous--;
@@ -4534,6 +4537,7 @@ static s32 stored_item_table_exchange(FarmStoredItem *current, s32 count, FarmSt
         stored_item_table_compact(current, count);
         break;
     }
+
     return -1;
 }
 
