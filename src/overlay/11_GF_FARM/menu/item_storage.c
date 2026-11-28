@@ -817,6 +817,11 @@ zero:
     status = item_category(item->id);
 
     if (status == 0) {
+        /* Preserve whole stacks only for bag-row to bag-row transfers.
+         * Keep the original one-item split for held-item and storage moves. */
+        if (result == ITEM_SLOT_ROW && item_slot_category(valueCol) == ITEM_SLOT_ROW) {
+            goto merge;
+        }
         goto failed;
     }
     if (status < 0) {

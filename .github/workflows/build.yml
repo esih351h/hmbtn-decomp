@@ -23,6 +23,25 @@ jobs:
           docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/src -w /src hmbtn-build
           bash -c 'cmake -S . -B build -G Ninja && cmake --build build --target check'
 
+      - name: Upload modified farm overlay
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: modified-farm-overlay
+          path: build/11_GF_FARM.bin
+          if-no-files-found: error
+
+      - name: Upload all built game binaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-game-binaries
+          path: |
+            build/SLUS_011.15
+            build/*.bin
+            build/*.Bin
+          if-no-files-found: error
+
       - name: Find shopping dialogue implementation
         run: |
           {
