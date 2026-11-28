@@ -23,6 +23,14 @@ jobs:
           docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/src -w /src hmbtn-build
           bash -c 'cmake -S . -B build -G Ninja && cmake --build build --target check'
 
+      - name: Upload modified farm overlay
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: modified-farm-overlay
+          path: build/11_GF_FARM.bin
+          if-no-files-found: error
+
       - name: Find shopping dialogue implementation
         run: |
           {
@@ -31,7 +39,7 @@ jobs:
 
             echo
             echo "=== SHOP DIALOGUE CODE ==="
-            grep -RnE -C 18 'SHOP_DIALOGUE_|ZONE_TELEPHONE|TELEPHONE|SATURDAY|DAY_OF_WEEK|WEEKDAY' \
+            grep -RnE -C 18 'SHOP_DIALOGUE_|ZONE_TELEPHONE|TELEPHONE|SATURDAY|DAY_OF_WEEK|WEEKDAY' \\
               src/overlay/11_GF_FARM --include='*.c' --include='*.h' || true
           } | head -n 260 > phone-order-code.txt
 
@@ -43,7 +51,7 @@ jobs:
 
       - name: Progress report
         run: |
-          curl -fsSL -o objdiff-cli \
+          curl -fsSL -o objdiff-cli \\
               https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64
           echo "e5445089a6f707e30cb5e02992451b604619cedfd2660ee2373a86bfefd9e718  objdiff-cli" | sha256sum -c -
           chmod +x objdiff-cli
